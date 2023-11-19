@@ -2,14 +2,14 @@
 <html>
 
 <head>
-    <title>Word List</title>
+    <title>WordCraft Hub</title>
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('build/assets/main-5ffef9fa.css') }}">
 </head>
 
 <body>
     <div class="container">
-        <h1>Word List</h1>
+        <h1>WordCraft Hub</h1>
         <table class="table">
             <thead class="thead-light">
                 <tr>
