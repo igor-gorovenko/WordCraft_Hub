@@ -13,7 +13,7 @@
         <table class="table">
             <thead class="thead-light">
                 <tr>
-                    <th>Id</th>
+                    <th>#</th>
                     <th>Word</th>
                     <th>Translation</th>
                     <th>Usage Count</th>
@@ -22,12 +22,15 @@
             </thead>
             <tbody>
                 @php
-                $totalWords = count($words);
+                // Получите слова, отсортированные по убыванию usage_count
+                $sortedWords = $words->sortByDesc('usage_count');
+
+                $totalWords = count($sortedWords);
                 @endphp
 
-                @foreach($words as $word)
+                @foreach($sortedWords as $index => $word)
                 <tr>
-                    <td>{{ $word->id }}</td>
+                    <td>{{ $index + 1 }}</td>
                     <td>{{ $word->word }}</td>
                     <td>{{ $word->translation }}</td>
                     <td>{{ $word->usage_count }}</td>
