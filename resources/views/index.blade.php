@@ -16,14 +16,22 @@
                     <th>Id</th>
                     <th>Word</th>
                     <th>Translation</th>
+                    <th>Usage Count</th>
+                    <th>Usage %</th>
                 </tr>
             </thead>
             <tbody>
+                @php
+                $totalWords = count($words);
+                @endphp
+
                 @foreach($words as $word)
                 <tr>
                     <td>{{ $word->id }}</td>
                     <td>{{ $word->word }}</td>
                     <td>{{ $word->translation }}</td>
+                    <td>{{ $word->usage_count }}</td>
+                    <td>{{ number_format(($word->usage_count / $totalWords) / 100, 2) }} %</td>
                 </tr>
                 @endforeach
             </tbody>

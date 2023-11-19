@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('word');
             $table->string('translation');
+            $table->integer('usage_count');
             $table->timestamps();
         });
     }
