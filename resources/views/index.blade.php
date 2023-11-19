@@ -21,20 +21,13 @@
                 </tr>
             </thead>
             <tbody>
-                @php
-                // Получите слова, отсортированные по убыванию usage_count
-                $sortedWords = $words->sortByDesc('usage_count');
-
-                $totalWords = count($sortedWords);
-                @endphp
-
-                @foreach($sortedWords as $index => $word)
+                @foreach($words->sortByDesc('usage_count') as $word)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $word->word }}</td>
                     <td>{{ $word->translation }}</td>
                     <td>{{ $word->usage_count }}</td>
-                    <td>{{ number_format(($word->usage_count / $totalWords) / 100, 2) }} %</td>
+                    <td>{{ number_format(($word->usage_count / $loop->count) / 100, 2) }} %</td>
                 </tr>
                 @endforeach
             </tbody>
