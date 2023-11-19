@@ -8,7 +8,10 @@
 </head>
 
 <body>
-    @yield('content')
+    <div class="container">
+        <h1>WordCraft Hub</h1>
+        @yield('content')
+    </div>
 </body>
 
 </html>
