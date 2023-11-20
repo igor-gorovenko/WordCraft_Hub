@@ -2,7 +2,7 @@
 
 @section('content')
 
-@include('components/filter')
-@include('components/table')
+@include('components.filter')
+@include('components.table')
 
 @endsection
