@@ -5,18 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Word extends Model
+class Tag extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'word',
-        'translation',
-        'usage_count',
+        'name'
     ];
 
-    public function tags()
+    public function words()
     {
-        return $this->belongsToMany(Tag::class, 'word_tags');
+        return $this->belongsToMany(Word::class, 'word_tags');
     }
 }
