@@ -10,7 +10,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($words->sortByDesc('usage_count') as $word)
+        @foreach($filteredTags ?? $words->sortByDesc('usage_count') as $word)
         <tr>
             <td>{{ $loop->iteration }}</td>
             <td><a href="{{ route('show', ['id' => $word->id]) }}">{{ $word->word }}</a></td>
