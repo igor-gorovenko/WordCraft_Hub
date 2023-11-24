@@ -25,22 +25,22 @@ class WordController extends Controller
         return view('show', compact('word'));
     }
 
-    public function filter(Request $request)
+
+    public function filterTags(Request $request)
     {
-        $tags = Tag::all();
-
-        // Получаем параметры из URL
         $selectedTags = $request->input('tags', []);
-        $filteredTags = [];
-
-        if (!empty($selectedTags)) {
-            $filteredTags = Word::whereHas('tags', function ($query) use ($selectedTags) {
-                $query->whereIn('name', $selectedTags);
-            })->get();
-        } else {
-            $filteredTags = Word::all();
-        }
-
-        return view('index', compact('filteredTags', 'tags', 'selectedTags'));
+    
+        $words = Word::with('tags')
+            ->when(count($selectedTags) > 0, function ($query) use ($selectedTags) {
+                $query->whereHas('tags', function ($tagQuery) use ($selectedTags) {
+                    $tagQuery->whereIn('name', $selectedTags);
+                });
+            })
+            ->get();
+    
+        $tags = Tag::all();
+    
+        // Возвращаем только содержимое таблицы в формате JSON
+        return response()->json(view('components.table', compact('words'))->render());
     }
 }
