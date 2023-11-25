@@ -12,15 +12,15 @@
         // На чекбоксы добавим обработчик события change
         $('input[name="tags[]"]').change(function () {
             updateTable();
+            updateURL();
         });
     });
 
-    
     function updateTable() {
         var selectedTags = $('input[name="tags[]"]:checked').map(function(){
             return $(this).val();
         }).get();
-
+        
         $.ajax({
             url: '/filter-tags',
             type: 'GET',
@@ -33,6 +33,16 @@
                 console.log(error);
             }
         });
+    }
+
+    function updateURL() {
+        var selectedTags = $('input[name="tags[]"]:checked').map(function(){
+            return $(this).val();
+        }).get();
+
+        // Обновляем URL, добавляя выбранные теги
+        var newURL = '/?tags=' + selectedTags.join(',');
+        history.pushState(null, null, newURL);
     }
 </script>
 

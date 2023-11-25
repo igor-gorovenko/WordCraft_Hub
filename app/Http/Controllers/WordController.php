@@ -8,13 +8,27 @@ use App\Models\Tag;
 
 class WordController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $words = Word::with('tags')->get();
         $tags = Tag::all();
-        $selectedTags = [];
+        $selectedTags = $request->input('tags', []);
+
+        // Если $selectedTags не является массивом, преобразуйте его в массив
+        if (!is_array($selectedTags)) {
+            $selectedTags = explode(',', $selectedTags);
+        }
+
+        $words = Word::with('tags')->get();
+
+        // Формируем URL в зависимости от выбранных тегов
+        $url = url('/');
+        if (!empty($selectedTags)) {
+            $url .= '?tags=' . implode(',', $selectedTags);
+        }
+
         return view('index', compact('words', 'tags', 'selectedTags'));
     }
+
 
     public function show($id)
     {
@@ -37,7 +51,12 @@ class WordController extends Controller
                 });
             })
             ->get();
-    
+
+        // Если теги не выбраны, просто получите все слова без фильтрации
+        if (empty($selectedTags)) {
+            $words = Word::with('tags')->get();
+        }
+
         $tags = Tag::all();
     
         // Возвращаем только содержимое таблицы в формате JSON
