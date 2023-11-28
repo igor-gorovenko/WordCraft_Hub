@@ -1,6 +1,8 @@
 <div class="bg-light p-4">
     <form action="{{ route('export') }}" method="GET">
-        <label>Tags</label>
+        <div>
+            <label>Tags</label>
+        </div>
         @foreach ($tags as $tag)
         <label>
             <input type="checkbox" name="tags[]" value="{{ $tag->name }}" @if(in_array($tag->name, $selectedTags)) checked @endif>

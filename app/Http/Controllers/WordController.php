@@ -70,17 +70,25 @@ class WordController extends Controller
             if (!empty($selectedTags)) {
                 $tagQuery->whereIn('name', $selectedTags);
             }
-        }])->get();
+        }])
+            ->orderBy('usage_count', 'desc')
+            ->get();
 
-        $csvData = "Word,Translation,Tags\n";
+        $csvData = "Number,Word,Translation,Usage Count,Usage %,Tags\n";
+        $count = 0;
 
         foreach ($words as $word) {
             // Используем метод pluck, чтобы получить массив имен тегов
             $tags = $word->tags->pluck('name')->implode(',');
+            $count++;
+
             $csvData .= sprintf(
-                "%s,%s,%s\n",
+                "%s,%s,%s,%s,%s,%s\n",
+                $count,
                 $word->word,
                 $word->translation,
+                $word->usage_count,
+                number_format(($word->usage_count / count($words)) / 100, 2, '.', ''),
                 $tags
             );
         }
