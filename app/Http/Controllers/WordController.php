@@ -80,6 +80,11 @@ class WordController extends Controller
         foreach ($words as $word) {
             // Используем метод pluck, чтобы получить массив имен тегов
             $tags = $word->tags->pluck('name')->implode(',');
+
+            // Обертываем теги в двойные кавычки
+            $tags = str_replace(',', ', ', $tags);
+            $tags = '"' . str_replace('"', '""', $tags) . '"';
+
             $count++;
 
             $csvData .= sprintf(
