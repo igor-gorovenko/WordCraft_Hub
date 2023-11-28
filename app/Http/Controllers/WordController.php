@@ -23,10 +23,9 @@ class WordController extends Controller
 
         $words = $query->get();
 
-        $url = '?tags=' . implode(',', $selectedTags);
-        if (!empty($selectedTags)) {
-            $url = '?tags=' . implode(',', $selectedTags);
-        }
+
+        $url = !empty($selectedTags) ? '?tags=' . implode(',', $selectedTags) : '';
+
 
         return view('index', compact('words', 'tags', 'selectedTags', 'url'));
     }
