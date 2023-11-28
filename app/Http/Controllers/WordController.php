@@ -11,7 +11,7 @@ class WordController extends Controller
     public function index(Request $request)
     {
         $tags = Tag::all();
-        $selectedTags = $this->normalizeTagsInput($request->input('tags'));
+        $selectedTags = $request->input('tags', []);
 
         $query = Word::with('tags');
 
@@ -21,11 +21,9 @@ class WordController extends Controller
 
         $words = $query->get();
 
-        $url = url('/');
-
-        // Добавляем временную метку к параметру tags
+        $url = '?tags=' . implode(',', $selectedTags);
         if (!empty($selectedTags)) {
-            $url .= '?tags=' . implode(',', $selectedTags);
+            $url = '?tags=' . implode(',', $selectedTags);
         }
 
         return view('index', compact('words', 'tags', 'selectedTags', 'url'));
@@ -45,7 +43,7 @@ class WordController extends Controller
 
     public function filter(Request $request)
     {
-        $selectedTags = $this->normalizeTagsInput($request->input('tags'));
+        $selectedTags = $request->input('tags', []);
 
         $query = Word::with('tags')->when($selectedTags, function ($query) use ($selectedTags) {
             $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
@@ -57,20 +55,33 @@ class WordController extends Controller
         return response()->json(view('components.table', compact('words'))->render());
     }
 
-
     public function export(Request $request)
     {
+        $selectedTags = $request->input('tags', []);
+
         $query = Word::query();
 
-        $words = $query->get();
+        if (!empty($selectedTags)) {
+            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
+        }
 
-        $csvData = "Word,Translation\n";
+        $words = $query->with(['tags' => function ($tagQuery) use ($selectedTags) {
+            // Добавляем фильтр для выбранных тегов в предварительной загрузке
+            if (!empty($selectedTags)) {
+                $tagQuery->whereIn('name', $selectedTags);
+            }
+        }])->get();
+
+        $csvData = "Word,Translation,Tags\n";
 
         foreach ($words as $word) {
+            // Используем метод pluck, чтобы получить массив имен тегов
+            $tags = $word->tags->pluck('name')->implode(',');
             $csvData .= sprintf(
-                "%s,%s\n",
+                "%s,%s,%s\n",
                 $word->word,
-                $word->translation
+                $word->translation,
+                $tags
             );
         }
 
@@ -79,12 +90,5 @@ class WordController extends Controller
         return response($csvData)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename={$filename}");
-    }
-
-
-
-    protected function normalizeTagsInput($input)
-    {
-        return is_array($input) ? $input : (empty($input) ? [] : explode(',', $input));
     }
 }
