@@ -11,55 +11,80 @@ class WordController extends Controller
     public function index(Request $request)
     {
         $tags = Tag::all();
-        $selectedTags = $request->input('tags', []);
+        $selectedTags = $this->normalizeTagsInput($request->input('tags'));
 
-        // Если $selectedTags не является массивом, преобразуйте его в массив
-        if (!is_array($selectedTags)) {
-            $selectedTags = explode(',', $selectedTags);
+        $query = Word::with('tags');
+
+        if (!empty($selectedTags)) {
+            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
         }
 
-        $words = Word::with('tags')->get();
+        $words = $query->get();
 
-        // Формируем URL в зависимости от выбранных тегов
         $url = url('/');
+
+        // Добавляем временную метку к параметру tags
         if (!empty($selectedTags)) {
             $url .= '?tags=' . implode(',', $selectedTags);
         }
 
-        return view('index', compact('words', 'tags', 'selectedTags'));
+        return view('index', compact('words', 'tags', 'selectedTags', 'url'));
     }
+
 
 
     public function show($id)
     {
         $word = Word::find($id);
-        if (!$word) {
-            abort(404);
-        }
+
+        abort_if(!$word, 404);
+
         return view('show', compact('word'));
     }
 
 
-    public function filterTags(Request $request)
+    public function filter(Request $request)
     {
-        $selectedTags = $request->input('tags', []);
-    
-        $words = Word::with('tags')
-            ->when(count($selectedTags) > 0, function ($query) use ($selectedTags) {
-                $query->whereHas('tags', function ($tagQuery) use ($selectedTags) {
-                    $tagQuery->whereIn('name', $selectedTags);
-                });
-            })
-            ->get();
+        $selectedTags = $this->normalizeTagsInput($request->input('tags'));
 
-        // Если теги не выбраны, просто получите все слова без фильтрации
-        if (empty($selectedTags)) {
-            $words = Word::with('tags')->get();
+        $query = Word::with('tags')->when($selectedTags, function ($query) use ($selectedTags) {
+            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
+        });
+
+        $words = $query->get();
+        $tags = Tag::all();
+
+        return response()->json(view('components.table', compact('words'))->render());
+    }
+
+
+    public function export(Request $request)
+    {
+        $query = Word::query();
+
+        $words = $query->get();
+
+        $csvData = "Word,Translation\n";
+
+        foreach ($words as $word) {
+            $csvData .= sprintf(
+                "%s,%s\n",
+                $word->word,
+                $word->translation
+            );
         }
 
-        $tags = Tag::all();
-    
-        // Возвращаем только содержимое таблицы в формате JSON
-        return response()->json(view('components.table', compact('words'))->render());
+        $filename = 'words' . '.csv';
+
+        return response($csvData)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename={$filename}");
+    }
+
+
+
+    protected function normalizeTagsInput($input)
+    {
+        return is_array($input) ? $input : (empty($input) ? [] : explode(',', $input));
     }
 }

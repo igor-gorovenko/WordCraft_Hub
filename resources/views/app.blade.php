@@ -9,7 +9,7 @@
 
 <body>
     <div class="container">
-        <h1>WordCraft Hub</h1>
+        <h1><a href="/">WordCraft Hub</a></h1>
         @yield('content')
     </div>
 </body>

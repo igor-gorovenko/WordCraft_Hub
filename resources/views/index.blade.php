@@ -8,23 +8,25 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
     // Дождитесь загрузки DOM
-    $(document).ready(function () {
+    $(document).ready(function() {
         // На чекбоксы добавим обработчик события change
-        $('input[name="tags[]"]').change(function () {
+        $('input[name="tags[]"]').change(function() {
             updateTable();
             updateURL();
         });
     });
 
     function updateTable() {
-        var selectedTags = $('input[name="tags[]"]:checked').map(function(){
+        var selectedTags = $('input[name="tags[]"]:checked').map(function() {
             return $(this).val();
         }).get();
-        
+
         $.ajax({
-            url: '/filter-tags',
+            url: '/filter',
             type: 'GET',
-            data: {tags: selectedTags},
+            data: {
+                tags: selectedTags
+            },
             success: function(response) {
                 // Заменяем содержимое таблицы на обновленное из response
                 $('table').replaceWith(response);
@@ -36,7 +38,7 @@
     }
 
     function updateURL() {
-        var selectedTags = $('input[name="tags[]"]:checked').map(function(){
+        var selectedTags = $('input[name="tags[]"]:checked').map(function() {
             return $(this).val();
         }).get();
 
