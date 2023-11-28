@@ -93,7 +93,7 @@ class WordController extends Controller
             );
         }
 
-        $filename = 'words' . '.csv';
+        $filename = 'words' . date('Y-m-d_H-i-s') . '.csv';
 
         return response($csvData)
             ->header('Content-Type', 'text/csv')
