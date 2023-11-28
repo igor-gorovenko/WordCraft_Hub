@@ -45,10 +45,14 @@ class WordController extends Controller
     {
         $selectedTags = $request->input('tags', []);
 
-        $query = Word::with('tags')->when($selectedTags, function ($query) use ($selectedTags) {
-            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        });
+        if (empty($selectedTags)) {
+            return redirect()->route('index');
+        }
 
+        // $query = Word::with('tags')->when($selectedTags, function ($query) use ($selectedTags) {
+        //     $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
+        // });
+        $query = Word::with('tags')->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
         $words = $query->get();
         $tags = Tag::all();
 

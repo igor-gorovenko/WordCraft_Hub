@@ -29,7 +29,7 @@
             },
             success: function(response) {
                 // Заменяем содержимое таблицы на обновленное из response
-                $('table').replaceWith(response);
+                $('table tbody').html($(response).find('tbody').html());
             },
             error: function(error) {
                 console.log(error);
@@ -43,7 +43,7 @@
         }).get();
 
         // Обновляем URL, добавляя выбранные теги
-        var newURL = '/?tags=' + selectedTags.join(',');
+        var newURL = selectedTags.length > 0 ? '/?tags=' + selectedTags.join(',') : '/';
         history.pushState(null, null, newURL);
     }
 </script>
