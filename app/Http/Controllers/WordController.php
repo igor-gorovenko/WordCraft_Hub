@@ -12,6 +12,8 @@ class WordController extends Controller
     {
         $tags = Tag::all();
         $selectedTags = $request->input('tags', []);
+        // Преобразуем в массив, если это строка
+        $selectedTags = is_array($selectedTags) ? $selectedTags : [$selectedTags];
 
         $query = Word::with('tags');
 
@@ -45,13 +47,12 @@ class WordController extends Controller
     {
         $selectedTags = $request->input('tags', []);
 
+
+
         if (empty($selectedTags)) {
             return redirect()->route('index');
         }
 
-        // $query = Word::with('tags')->when($selectedTags, function ($query) use ($selectedTags) {
-        //     $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        // });
         $query = Word::with('tags')->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
         $words = $query->get();
         $tags = Tag::all();
