@@ -21,7 +21,7 @@ git clone git@github.com:igor-gorovenko/word_craft_hub.git
 Переходим в скопированный проект, в корневую папку
 
 ```
-cd word_craft_hub.git
+cd word_craft_hub
 ```
 
 #### 2. Install dependencies:
@@ -59,7 +59,7 @@ php artisan migrate
 php artisan db:seed
 ```
 
-#### 5. Запускаем проект
+#### 4. Запускаем проект
 
 Запустить сервер с помощью artisan или своим способом
 ```
