@@ -31,17 +31,6 @@ class WordController extends Controller
     }
 
 
-
-    public function show($id)
-    {
-        $word = Word::find($id);
-
-        abort_if(!$word, 404);
-
-        return view('site.show', compact('word'));
-    }
-
-
     public function filter(Request $request)
     {
         $selectedTags = $request->input('tags', []);

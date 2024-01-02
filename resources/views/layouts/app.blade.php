@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="{{ asset('build/assets/main-5ffef9fa.css') }}">
 </head>
 
-<body>
+<body class="bg-light">
     @include('components/header')
-    <div class="container mt-2">
+    <div class="container mt-4">
         @yield('content')
     </div>
 </body>

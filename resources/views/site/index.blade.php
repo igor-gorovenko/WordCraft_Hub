@@ -2,8 +2,17 @@
 
 @section('content')
 
-@include('components/filter')
-@include('components/table')
+<div class="row">
+    <div class="col-3">
+        @include('components/filter')
+    </div>
+    <div class="col-9">
+        @include('components/table')
+    </div>
+
+</div>
+
+
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
