@@ -10,7 +10,12 @@
             </tr>
         </thead>
         <tbody>
-            @foreach( $words as $word)
+            @php
+            // Сортировка слов по убыванию частоты использования
+            $sortedWords = $words->sortByDesc('usage_count');
+            @endphp
+
+            @foreach( $sortedWords as $word)
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $word->word }}</td>
