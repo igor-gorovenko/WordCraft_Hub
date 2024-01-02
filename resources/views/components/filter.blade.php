@@ -10,7 +10,7 @@
         </label>
         @endforeach
         <div>
-            <button type="submit">Export</button>
+            <button class="btn btn-outline-dark" type="submit">Export</button>
         </div>
     </form>
 </div>

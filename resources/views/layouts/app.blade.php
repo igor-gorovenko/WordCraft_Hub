@@ -8,8 +8,8 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1><a href="{{ route('index') }}">Word Craft Hub</a></h1>
+    @include('components/header')
+    <div class="container mt-2">
         @yield('content')
     </div>
 </body>

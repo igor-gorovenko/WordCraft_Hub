@@ -27,7 +27,7 @@ class WordController extends Controller
         $url = !empty($selectedTags) ? '?tags=' . implode(',', $selectedTags) : '';
 
 
-        return view('index', compact('words', 'tags', 'selectedTags', 'url'));
+        return view('site.index', compact('words', 'tags', 'selectedTags', 'url'));
     }
 
 
@@ -38,7 +38,7 @@ class WordController extends Controller
 
         abort_if(!$word, 404);
 
-        return view('show', compact('word'));
+        return view('site.show', compact('word'));
     }
 
 
