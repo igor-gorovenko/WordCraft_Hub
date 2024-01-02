@@ -11,12 +11,7 @@ class Word extends Model
 
     protected $fillable = [
         'word',
-        'translation',
+        'translate',
         'usage_count',
     ];
-
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class, 'word_tags');
-    }
 }

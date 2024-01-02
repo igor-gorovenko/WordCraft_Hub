@@ -4,48 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Word;
-use App\Models\Tag;
 
 class WordController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $tags = Tag::all();
-        $selectedTags = $request->input('tags', []);
-        // Преобразуем в массив, если это строка
-        $selectedTags = is_array($selectedTags) ? $selectedTags : [$selectedTags];
+        $words = Word::all();
 
-        $query = Word::with('tags');
-
-        if (!empty($selectedTags)) {
-            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        }
-
-        $words = $query->get();
-
-
-        $url = !empty($selectedTags) ? '?tags=' . implode(',', $selectedTags) : '';
-
-
-        return view('site.index', compact('words', 'tags', 'selectedTags', 'url'));
-    }
-
-
-    public function filter(Request $request)
-    {
-        $selectedTags = $request->input('tags', []);
-
-
-
-        if (empty($selectedTags)) {
-            return redirect()->route('index');
-        }
-
-        $query = Word::with('tags')->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        $words = $query->get();
-        $tags = Tag::all();
-
-        return response()->json(view('components.table', compact('words'))->render());
+        return view('site.index', compact('words'));
     }
 
     public function export(Request $request)
