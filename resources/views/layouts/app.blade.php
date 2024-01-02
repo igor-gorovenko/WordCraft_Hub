@@ -4,7 +4,7 @@
 <head>
     <title>Word Craft Hub</title>
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ asset('build/assets/main-5ffef9fa.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
