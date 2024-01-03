@@ -7,6 +7,7 @@
                 <th>Word</th>
                 <th>Translate</th>
                 <th>Usage Count</th>
+                <th>Parts of speech</th>
             </tr>
         </thead>
         <tbody>
@@ -21,6 +22,13 @@
                 <td>{{ $word->word }}</td>
                 <td>{{ $word->translate }}</td>
                 <td>{{ $word->usage_count }}</td>
+                <td>
+                    @if($word->partsOfSpeech)
+                    @foreach($word->partsOfSpeech as $partOfSpeech)
+                    {{ $partOfSpeech->name }},
+                    @endforeach
+                    @endif
+                </td>
             </tr>
             @endforeach
         </tbody>

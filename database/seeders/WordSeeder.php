@@ -12,7 +12,7 @@ class WordSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('words')->truncate();
+        // DB::table('words')->truncate();
 
         $words = [
             ['word' => 'apple', 'translate' => 'яблоко', 'usage_count' => rand(200, 1000)],
@@ -27,7 +27,6 @@ class WordSeeder extends Seeder
             ['word' => 'lemon', 'translate' => 'лимон', 'usage_count' => rand(200, 1000)],
         ];
 
-        // Add words
         DB::table('words')->insert($words);
     }
 }
