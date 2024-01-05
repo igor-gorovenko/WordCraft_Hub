@@ -12,7 +12,7 @@ class PartOfSpeechSeeder extends Seeder
      */
     public function run(): void
     {
-        // DB::table('parts_of_speech')->truncate();
+        DB::table('parts_of_speech')->delete();
 
         $parts_of_speech = [
             ['name' => 'noun'],

@@ -1,8 +1,11 @@
 <div class="bg-white p-4">
     <h4>Filters</h4>
-    <form action="{{ route('export') }}" method="GET">
-        <div>
-            <button class="btn btn-outline-dark" type="submit">Export</button>
-        </div>
-    </form>
+
+    @foreach($partOfSpeech as $part)
+    <div>
+        {{ $part->name }}
+    </div>
+    @endforeach
+    <button type="submit" class="btn btn-outline-dark">Update List</button>
+
 </div>

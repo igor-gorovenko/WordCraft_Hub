@@ -1,6 +1,13 @@
 <div class="bg-white p-4">
-    <table class="table">
+    <div class="d-flex justify-content-between align-items-center">
         <h4>All words</h4>
+        <form action="{{ route('export') }}" method="GET">
+            <div>
+                <button class="btn btn-outline-dark" type="submit">Export</button>
+            </div>
+        </form>
+    </div>
+    <table class="table">
         <thead>
             <tr>
                 <th>#</th>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PartOfSpeech;
 use Illuminate\Http\Request;
 use App\Models\Word;
 
@@ -10,8 +11,9 @@ class WordController extends Controller
     public function index()
     {
         $words = Word::all();
+        $partOfSpeech = PartOfSpeech::all();
 
-        return view('site.index', compact('words'));
+        return view('site.index', compact('words', 'partOfSpeech'));
     }
 
     public function export(Request $request)
