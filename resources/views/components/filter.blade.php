@@ -8,7 +8,7 @@
                 @foreach($partOfSpeech as $part)
                 <div class="form-check mb-1">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="selectedParts[]" value="{{ $part->name }}" {{ in_array($part->name, $selectedParts) ? 'checked' : '' }}>
+                        <input class="form-check-input" type="checkbox" name="part[]" value="{{ $part->name }}" {{ in_array($part->name, $selectedParts) ? 'checked' : '' }}>
                         {{ $part->name }}
                     </label>
                 </div>

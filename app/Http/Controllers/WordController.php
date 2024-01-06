@@ -20,7 +20,11 @@ class WordController extends Controller
     public function filter(Request $request)
     {
         $partOfSpeech = PartOfSpeech::all();
-        $selectedParts = $request->input('selectedParts', []);
+        $selectedParts = $request->input('part', []);
+
+        if (empty($selectedParts)) {
+            return redirect()->route('index');
+        }
 
         $query = Word::query();
 
@@ -31,12 +35,6 @@ class WordController extends Controller
         }
 
         $words = $query->with('partsOfSpeech')->orderBy('usage_count', 'desc')->get();
-
-        if (empty($selectedParts)) {
-            return redirect()->route('index');
-        }
-
-        // $url = '?' . http_build_query(['parts' => implode(',', $selectedParts)]);
 
         return view('site.index', compact('partOfSpeech', 'selectedParts', 'words'));
     }
