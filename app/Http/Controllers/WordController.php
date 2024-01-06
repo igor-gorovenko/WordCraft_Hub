@@ -32,11 +32,13 @@ class WordController extends Controller
 
         $words = $query->with('partsOfSpeech')->orderBy('usage_count', 'desc')->get();
 
-        return view('site.index', [
-            'partOfSpeech' => $partOfSpeech,
-            'words' => $words,
-            'selectedParts' => $selectedParts,
-        ]);
+        if (empty($selectedParts)) {
+            return redirect()->route('index');
+        }
+
+        // $url = '?' . http_build_query(['parts' => implode(',', $selectedParts)]);
+
+        return view('site.index', compact('partOfSpeech', 'selectedParts', 'words'));
     }
 
     public function export(Request $request)
