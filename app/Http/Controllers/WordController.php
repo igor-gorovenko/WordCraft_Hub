@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PartOfSpeech;
 use Illuminate\Http\Request;
 use App\Models\Word;
+use App\Models\PartOfSpeech;
 
 class WordController extends Controller
 {
@@ -12,8 +12,31 @@ class WordController extends Controller
     {
         $words = Word::all();
         $partOfSpeech = PartOfSpeech::all();
+        $selectedParts = [];
 
-        return view('site.index', compact('words', 'partOfSpeech'));
+        return view('site.index', compact('words', 'partOfSpeech', 'selectedParts'));
+    }
+
+    public function filter(Request $request)
+    {
+        $partOfSpeech = PartOfSpeech::all();
+        $selectedParts = $request->input('selectedParts', []);
+
+        $query = Word::query();
+
+        if (!empty($selectedParts)) {
+            $query->whereHas('partsOfSpeech', function ($partQuery) use ($selectedParts) {
+                $partQuery->whereIn('name', $selectedParts);
+            });
+        }
+
+        $words = $query->with('partsOfSpeech')->orderBy('usage_count', 'desc')->get();
+
+        return view('site.index', [
+            'partOfSpeech' => $partOfSpeech,
+            'words' => $words,
+            'selectedParts' => $selectedParts,
+        ]);
     }
 
     public function export(Request $request)
