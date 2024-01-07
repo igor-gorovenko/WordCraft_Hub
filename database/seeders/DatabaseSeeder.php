@@ -12,7 +12,5 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(PartOfSpeechSeeder::class);
-        $this->call(WordSeeder::class);
-        $this->call(WordPartOfSpeechTableSeeder::class);
     }
 }

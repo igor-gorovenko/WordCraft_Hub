@@ -10,9 +10,13 @@
 
     <form action="{{ route('word.store') }}" method="post">
         @csrf
-        <label for="word">Word:</label>
-        <input type="text" name="word" required>
-        <button class="btn btn-outline-dark" type="submit">Create</button>
+        <label for="wordList">Word:</label>
+        <div>
+            <textarea name="wordList" rows="5" placeholder="Enter words"></textarea>
+        </div>
+
+
+        <button class="btn btn-outline-dark" type="submit">Create words</button>
 
     </form>
 

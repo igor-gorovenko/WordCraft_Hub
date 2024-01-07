@@ -24,22 +24,28 @@ class WordController extends Controller
 
     public function store(StoreWordRequest $request)
     {
-        $wordValue = $request->input('word');
+        $wordList = $request->input('wordList');
+        $wordsArray = explode(' ', $wordList);
 
-        //
+        foreach ($wordsArray as $wordValue) {
+            $existingWord = Word::where('word', $wordValue)->first();
 
-        $existingWord = Word::where('word', $wordValue)->first();
-
-        if ($existingWord) {
-            return redirect()->back()->with('error', 'The word already exists in the database.');
+            if (!$existingWord) {
+                $this->createWord($wordValue);
+            }
         }
 
-        $translation = $this->getTranslation($wordValue);
-        $perMillion = $this->getWordFrequency($wordValue);
-        $partOfSpeech = $this->getWordPartOfSpeech($wordValue);
+        return redirect()->route('index')->with('success', 'Words processed successfully');
+    }
+
+    protected function createWord($word)
+    {
+        $translation = $this->getTranslation($word);
+        $perMillion = $this->getWordFrequency($word);
+        $partOfSpeech = $this->getWordPartOfSpeech($word);
 
         $wordModel = Word::create([
-            'word' => $wordValue,
+            'word' => $word,
             'translate' => $translation,
             'frequency' => $perMillion,
         ]);
@@ -50,9 +56,7 @@ class WordController extends Controller
         // Присваиваем части речи слову
         $wordModel->partsOfSpeech()->attach($partOfSpeechIds);
 
-        return $wordModel
-            ? redirect()->route('index')->with('success', 'Create new word')
-            : redirect()->back()->with('error', 'Failed to create new word');
+        return $wordModel;
     }
 
     protected function getTranslation($word)
