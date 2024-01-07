@@ -14,8 +14,10 @@
                 </div>
                 @endforeach
             </div>
-            <a href="{{ route('index') }}" class="btn btn-outline-danger">Reset</a>
-            <button type="submit" class="btn btn-outline-dark">Apply</button>
+            <div>
+                <a href="{{ route('index') }}" class="btn btn-outline-danger me-2">Reset</a>
+                <button type="submit" class="btn btn-outline-dark">Apply</button>
+            </div>
         </form>
     </div>
 </div>

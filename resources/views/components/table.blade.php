@@ -1,11 +1,15 @@
 <div class="bg-white p-4">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center mb-2">
         <h4>All words</h4>
-        <form action="{{ route('export') }}" method="GET">
-            <div>
-                <button class="btn btn-outline-dark" type="submit">Export</button>
-            </div>
-        </form>
+        <div class="d-flex">
+            <a href="{{ route('word.create') }}" class="btn btn-outline-success me-2" type="submit">Add word</a>
+
+            <form action="{{ route('export') }}" method="GET">
+                <div>
+                    <button class="btn btn-outline-dark" type="submit">Export</button>
+                </div>
+            </form>
+        </div>
     </div>
     <table class="table">
         <thead>
