@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
 use App\Models\Word;
 use App\Models\PartOfSpeech;
 use App\Http\Requests\StoreWordRequest;
@@ -25,30 +24,35 @@ class WordController extends Controller
 
     public function store(StoreWordRequest $request)
     {
-        $word = $request->input('word');
-        $translation = $this->getTranslation($word);
-        $perMillion = $this->getWordFrequency($word);
-        $partOfSpeech = $this->getWordPartOfSpeech($word);
+        $wordValue = $request->input('word');
 
-        $word = new Word([
-            'word' => $word,
+        //
+
+        $existingWord = Word::where('word', $wordValue)->first();
+
+        if ($existingWord) {
+            return redirect()->back()->with('error', 'The word already exists in the database.');
+        }
+
+        $translation = $this->getTranslation($wordValue);
+        $perMillion = $this->getWordFrequency($wordValue);
+        $partOfSpeech = $this->getWordPartOfSpeech($wordValue);
+
+        $wordModel = Word::create([
+            'word' => $wordValue,
             'translate' => $translation,
             'frequency' => $perMillion,
         ]);
-
-        $word->save();
 
         // Получите id частей речи из базы данных, используя их названия
         $partOfSpeechIds = PartOfSpeech::whereIn('name', $partOfSpeech)->pluck('id')->toArray();
 
         // Присваиваем части речи слову
-        $word->partsOfSpeech()->attach($partOfSpeechIds);
+        $wordModel->partsOfSpeech()->attach($partOfSpeechIds);
 
-        if ($word->save()) {
-            return redirect()->route('index')->with('success', 'Create new word');
-        } else {
-            return redirect()->back()->with('error', 'Failed to create new word');
-        }
+        return $wordModel
+            ? redirect()->route('index')->with('success', 'Create new word')
+            : redirect()->back()->with('error', 'Failed to create new word');
     }
 
     protected function getTranslation($word)
