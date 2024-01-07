@@ -61,7 +61,7 @@ class WordController extends Controller
             ],
             'headers' => [
                 'X-RapidAPI-Host' => 'google-translate113.p.rapidapi.com',
-                'X-RapidAPI-Key' => 'eb50749f2cmshdecefc5a0e13308p1df499jsn71ec09d865a6',
+                'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
                 'content-type' => 'application/x-www-form-urlencoded',
             ],
         ]);
@@ -76,7 +76,7 @@ class WordController extends Controller
         $response = $this->client->request('GET', "https://wordsapiv1.p.rapidapi.com/words/{$word}/frequency", [
             'headers' => [
                 'X-RapidAPI-Host' => 'wordsapiv1.p.rapidapi.com',
-                'X-RapidAPI-Key' => 'eb50749f2cmshdecefc5a0e13308p1df499jsn71ec09d865a6',
+                'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
             ],
         ]);
 
@@ -90,7 +90,7 @@ class WordController extends Controller
         $response = $this->client->request('GET', "https://wordsapiv1.p.rapidapi.com/words/{$word}/definitions", [
             'headers' => [
                 'X-RapidAPI-Host' => 'wordsapiv1.p.rapidapi.com',
-                'X-RapidAPI-Key' => 'eb50749f2cmshdecefc5a0e13308p1df499jsn71ec09d865a6',
+                'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
             ],
         ]);
 
