@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Models\Word;
 use App\Models\PartOfSpeech;
+use App\Http\Requests\StoreWordRequest;
 
 class WordController extends Controller
 {
@@ -22,12 +23,8 @@ class WordController extends Controller
         return view('site.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreWordRequest $request)
     {
-        $request->validate([
-            'word' => 'required|string|max:255',
-        ]);
-
         $word = $request->input('word');
         $translation = $this->getTranslation($word);
         $perMillion = $this->getWordFrequency($word);
