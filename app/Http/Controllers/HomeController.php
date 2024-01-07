@@ -34,7 +34,7 @@ class HomeController extends Controller
             });
         }
 
-        $words = $query->with('partsOfSpeech')->orderBy('usage_count', 'desc')->get();
+        $words = $query->with('partsOfSpeech')->orderBy('frequency', 'desc')->get();
 
         return view('site.index', compact('partOfSpeech', 'selectedParts', 'words'));
     }
@@ -55,7 +55,7 @@ class HomeController extends Controller
                 $tagQuery->whereIn('name', $selectedTags);
             }
         }])
-            ->orderBy('usage_count', 'desc')
+            ->orderBy('frequency', 'desc')
             ->get();
 
         $csvData = "Number,Word,Translation,Usage Count,Usage %,Tags\n";

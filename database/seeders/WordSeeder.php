@@ -15,16 +15,15 @@ class WordSeeder extends Seeder
         DB::table('words')->delete();
 
         $words = [
-            ['word' => 'apple', 'translate' => 'яблоко', 'usage_count' => rand(200, 1000)],
-            ['word' => 'banana', 'translate' => 'банан', 'usage_count' => rand(200, 1000)],
-            ['word' => 'cherry', 'translate' => 'вишня', 'usage_count' => rand(200, 1000)],
-            ['word' => 'date', 'translate' => 'финик', 'usage_count' => rand(200, 1000)],
-            ['word' => 'elderberry', 'translate' => 'бузина', 'usage_count' => rand(200, 1000)],
-            ['word' => 'fig', 'translate' => 'инжир', 'usage_count' => rand(200, 1000)],
-            ['word' => 'grape', 'translate' => 'виноград', 'usage_count' => rand(200, 1000)],
-            ['word' => 'honeydew', 'translate' => 'дыня', 'usage_count' => rand(200, 1000)],
-            ['word' => 'kiwi', 'translate' => 'киви', 'usage_count' => rand(200, 1000)],
-            ['word' => 'lemon', 'translate' => 'лимон', 'usage_count' => rand(200, 1000)],
+            ['word' => 'apple', 'translate' => 'яблоко', 'frequency' => 22.03],
+            ['word' => 'banana', 'translate' => 'банан', 'frequency' => 9.45],
+            ['word' => 'cherry', 'translate' => 'вишня', 'frequency' => 12.25],
+            ['word' => 'elderberry', 'translate' => 'бузина', 'frequency' => 0.05],
+            ['word' => 'fig', 'translate' => 'инжир', 'frequency' => 1.53],
+            ['word' => 'grape', 'translate' => 'виноград', 'frequency' => 2.99],
+            ['word' => 'honeydew', 'translate' => 'дыня', 'frequency' => 0.13],
+            ['word' => 'kiwi', 'translate' => 'киви', 'frequency' => 0.89],
+            ['word' => 'lemon', 'translate' => 'лимон', 'frequency' => 9.92],
         ];
 
         DB::table('words')->insert($words);

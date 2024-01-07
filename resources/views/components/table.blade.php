@@ -17,14 +17,14 @@
                 <th>#</th>
                 <th>Word</th>
                 <th>Translate</th>
-                <th>Usage Count</th>
+                <th>Frequency</th>
                 <th>Parts of speech</th>
             </tr>
         </thead>
         <tbody>
             @php
             // Сортировка слов по убыванию частоты использования
-            $sortedWords = $words->sortByDesc('usage_count');
+            $sortedWords = $words->sortByDesc('frequency');
             @endphp
 
             @foreach( $sortedWords as $word)
@@ -32,7 +32,7 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $word->word }}</td>
                 <td>{{ $word->translate }}</td>
-                <td>{{ $word->usage_count }}</td>
+                <td>{{ $word->frequency }}</td>
                 <td>
                     @if($word->partsOfSpeech)
                     @foreach($word->partsOfSpeech as $partOfSpeech)

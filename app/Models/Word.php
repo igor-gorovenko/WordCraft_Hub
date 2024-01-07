@@ -13,7 +13,7 @@ class Word extends Model
     protected $fillable = [
         'word',
         'translate',
-        'usage_count',
+        'frequency',
     ];
 
     public function partsOfSpeech()

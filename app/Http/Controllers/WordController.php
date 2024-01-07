@@ -36,7 +36,7 @@ class WordController extends Controller
         $word = new Word([
             'word' => $word,
             'translate' => $translation,
-            'usage_count' => $perMillion,
+            'frequency' => $perMillion,
         ]);
 
         $word->save();
