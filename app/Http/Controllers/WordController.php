@@ -25,17 +25,28 @@ class WordController extends Controller
     public function store(StoreWordRequest $request)
     {
         $wordList = $request->input('wordList');
-        $wordsArray = explode(' ', $wordList);
+
+        $wordsArray = $this->splitWords($wordList);
 
         foreach ($wordsArray as $wordValue) {
             $existingWord = Word::where('word', $wordValue)->first();
 
-            if (!$existingWord) {
+            if (!$existingWord && !empty($wordValue)) {
                 $this->createWord($wordValue);
             }
         }
 
         return redirect()->route('index')->with('success', 'Words processed successfully');
+    }
+
+    protected function splitWords($wordList)
+    {
+        $delimiters = [" ", "%0D%0A", "\n", "\r"];
+        $replaceDelimiter = '|';
+
+        $wordList = str_replace($delimiters, $replaceDelimiter, $wordList);
+
+        return explode($replaceDelimiter, $wordList);
     }
 
     protected function createWord($word)
