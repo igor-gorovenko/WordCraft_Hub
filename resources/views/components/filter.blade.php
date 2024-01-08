@@ -1,6 +1,5 @@
 <div class="bg-white p-4">
     <h4>Filters</h4>
-
     <div>
         <h6>Parts of Speech</h6>
         <form action="{{ route('filter') }}" method="GET">

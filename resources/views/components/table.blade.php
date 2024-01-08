@@ -22,6 +22,7 @@
             </tr>
         </thead>
         <tbody>
+
             @php
             // Сортировка слов по убыванию частоты использования
             $sortedWords = $words->sortByDesc('frequency');

@@ -39,46 +39,34 @@ class HomeController extends Controller
         return view('site.index', compact('partOfSpeech', 'selectedParts', 'words'));
     }
 
-    public function export(Request $request)
+    public function export()
     {
-        $selectedTags = $request->input('tags', []);
-
         $query = Word::query();
 
-        if (!empty($selectedTags)) {
-            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        }
-
-        $words = $query->with(['tags' => function ($tagQuery) use ($selectedTags) {
-            // Добавляем фильтр для выбранных тегов в предварительной загрузке
-            if (!empty($selectedTags)) {
-                $tagQuery->whereIn('name', $selectedTags);
-            }
-        }])
+        $words = $query->with('partsOfSpeech')
             ->orderBy('frequency', 'desc')
             ->get();
 
-        $csvData = "Number,Word,Translation,Usage Count,Usage %,Tags\n";
+        $csvData = "#,Word,Translate,Frequency,Parts of Speech\n";
         $count = 0;
 
         foreach ($words as $word) {
             // Используем метод pluck, чтобы получить массив имен тегов
-            $tags = $word->tags->pluck('name')->implode(',');
+            $partsOfSpeech = $word->partsOfSpeech->pluck('name')->implode(',');
 
             // Обертываем теги в двойные кавычки
-            $tags = str_replace(',', ', ', $tags);
-            $tags = '"' . str_replace('"', '""', $tags) . '"';
+            $partsOfSpeech = str_replace(',', ', ', $partsOfSpeech);
+            $partsOfSpeech = '"' . str_replace('"', '""', $partsOfSpeech) . '"';
 
             $count++;
 
             $csvData .= sprintf(
-                "%s,%s,%s,%s,%s,%s\n",
+                "%s,%s,%s,%s,%s\n",
                 $count,
                 $word->word,
-                $word->translation,
-                $word->usage_count,
-                number_format(($word->usage_count / count($words)) / 100, 2, '.', ''),
-                $tags
+                $word->translate,
+                $word->frequency,
+                $partsOfSpeech
             );
         }
 

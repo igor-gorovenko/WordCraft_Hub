@@ -9,7 +9,6 @@
     <div class="col-9">
         @include('components/table')
     </div>
-
 </div>
 
 @endsection
