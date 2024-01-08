@@ -66,15 +66,8 @@ php artisan db:seed
 php artisan serve
 ```
 
-Пользователи для входа
+List word for add
+
 ```
-// Admin
-
-admin@example.com
-test1234
-
-// User
-
-user@example.com
-test1234
+nice for make butter good friend world paper screen
 ```

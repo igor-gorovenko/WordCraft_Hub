@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('word_tags', function (Blueprint $table) {
+        Schema::create('word_part_of_speech', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('word_id');
-            $table->unsignedBigInteger('tag_id');
+            $table->unsignedBigInteger('part_of_speech_id');
             $table->timestamps();
 
             $table->foreign('word_id')->references('id')->on('words')->onDelete('cascade');
-            $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
+            $table->foreign('part_of_speech_id')->references('id')->on('parts_of_speech')->onDelete('cascade');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('word_tags');
+        Schema::dropIfExists('word_part_of_speech');
     }
 };

@@ -2,110 +2,138 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 use App\Models\Word;
-use App\Models\Tag;
+use App\Models\PartOfSpeech;
+use App\Http\Requests\StoreWordRequest;
 
 class WordController extends Controller
 {
-    public function index(Request $request)
+
+    protected $client;
+
+    public function __construct()
     {
-        $tags = Tag::all();
-        $selectedTags = $request->input('tags', []);
-        // Преобразуем в массив, если это строка
-        $selectedTags = is_array($selectedTags) ? $selectedTags : [$selectedTags];
-
-        $query = Word::with('tags');
-
-        if (!empty($selectedTags)) {
-            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        }
-
-        $words = $query->get();
-
-
-        $url = !empty($selectedTags) ? '?tags=' . implode(',', $selectedTags) : '';
-
-
-        return view('index', compact('words', 'tags', 'selectedTags', 'url'));
+        $this->client = new Client();
     }
 
-
-
-    public function show($id)
+    public function create()
     {
-        $word = Word::find($id);
-
-        abort_if(!$word, 404);
-
-        return view('show', compact('word'));
+        return view('site.create');
     }
 
-
-    public function filter(Request $request)
+    public function store(StoreWordRequest $request)
     {
-        $selectedTags = $request->input('tags', []);
+        $wordList = $request->input('wordList');
 
+        $wordsArray = $this->splitWords($wordList);
 
+        foreach ($wordsArray as $wordValue) {
+            if ($wordValue !== '') {
+                $existingWord = Word::where('word', $wordValue)->first();
 
-        if (empty($selectedTags)) {
-            return redirect()->route('index');
-        }
-
-        $query = Word::with('tags')->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        $words = $query->get();
-        $tags = Tag::all();
-
-        return response()->json(view('components.table', compact('words'))->render());
-    }
-
-    public function export(Request $request)
-    {
-        $selectedTags = $request->input('tags', []);
-
-        $query = Word::query();
-
-        if (!empty($selectedTags)) {
-            $query->whereHas('tags', fn ($tagQuery) => $tagQuery->whereIn('name', $selectedTags));
-        }
-
-        $words = $query->with(['tags' => function ($tagQuery) use ($selectedTags) {
-            // Добавляем фильтр для выбранных тегов в предварительной загрузке
-            if (!empty($selectedTags)) {
-                $tagQuery->whereIn('name', $selectedTags);
+                if (!$existingWord) {
+                    $this->createWord($wordValue);
+                }
             }
-        }])
-            ->orderBy('usage_count', 'desc')
-            ->get();
-
-        $csvData = "Number,Word,Translation,Usage Count,Usage %,Tags\n";
-        $count = 0;
-
-        foreach ($words as $word) {
-            // Используем метод pluck, чтобы получить массив имен тегов
-            $tags = $word->tags->pluck('name')->implode(',');
-
-            // Обертываем теги в двойные кавычки
-            $tags = str_replace(',', ', ', $tags);
-            $tags = '"' . str_replace('"', '""', $tags) . '"';
-
-            $count++;
-
-            $csvData .= sprintf(
-                "%s,%s,%s,%s,%s,%s\n",
-                $count,
-                $word->word,
-                $word->translation,
-                $word->usage_count,
-                number_format(($word->usage_count / count($words)) / 100, 2, '.', ''),
-                $tags
-            );
         }
 
-        $filename = 'words' . date('Y-m-d_H-i-s') . '.csv';
+        return redirect()->route('index')->with('success', 'Words processed successfully');
+    }
 
-        return response($csvData)
-            ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', "attachment; filename={$filename}");
+    protected function splitWords($wordList)
+    {
+        $delimiters = [" ", "%0D%0A", "\n", "\r"];
+        $replaceDelimiter = '|';
+
+        $wordList = str_replace($delimiters, $replaceDelimiter, $wordList);
+
+        return explode($replaceDelimiter, $wordList);
+    }
+
+    protected function createWord($word)
+    {
+        $translation = $this->getTranslation($word);
+        $perMillion = $this->getWordFrequency($word);
+        $partOfSpeech = $this->getWordPartOfSpeech($word);
+
+        $wordModel = Word::create([
+            'word' => $word,
+            'translate' => $translation,
+            'frequency' => $perMillion,
+        ]);
+
+        // Получите id частей речи из базы данных, используя их названия
+        $partOfSpeechIds = PartOfSpeech::whereIn('name', $partOfSpeech)->pluck('id')->toArray();
+
+        // Присваиваем части речи слову
+        $wordModel->partsOfSpeech()->attach($partOfSpeechIds);
+
+        return $wordModel;
+    }
+
+    protected function getTranslation($word)
+    {
+        $response = $this->client->request('POST', 'https://google-translate113.p.rapidapi.com/api/v1/translator/text', [
+            'form_params' => [
+                'from' => 'en',
+                'to' => 'ru',
+                'text' => $word,
+            ],
+            'headers' => [
+                'X-RapidAPI-Host' => 'google-translate113.p.rapidapi.com',
+                'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
+                'content-type' => 'application/x-www-form-urlencoded',
+            ],
+        ]);
+
+        $translationData = json_decode($response->getBody()->getContents(), true);
+
+        return isset($translationData['trans']) ? $translationData['trans'] : 'Translation not available';
+    }
+
+    protected function getWordFrequency($word)
+    {
+        $response = $this->client->request('GET', "https://wordsapiv1.p.rapidapi.com/words/{$word}/frequency", [
+            'headers' => [
+                'X-RapidAPI-Host' => 'wordsapiv1.p.rapidapi.com',
+                'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
+            ],
+        ]);
+
+        $wordsApiData = json_decode($response->getBody()->getContents(), true);
+
+        return isset($wordsApiData['frequency']['perMillion']) ? $wordsApiData['frequency']['perMillion'] : 0;
+    }
+
+    protected function getWordPartOfSpeech($word)
+    {
+        $response = $this->client->request('GET', "https://wordsapiv1.p.rapidapi.com/words/{$word}/definitions", [
+            'headers' => [
+                'X-RapidAPI-Host' => 'wordsapiv1.p.rapidapi.com',
+                'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
+            ],
+        ]);
+
+        $wordsApiData = json_decode($response->getBody()->getContents(), true);
+
+        // Получаем определения из ответа API
+        $definitions = $wordsApiData['definitions'];
+
+        // Инициализируем массив для хранения уникальных частей речи
+        $uniquePartsOfSpeech = [];
+
+        // Итерируем по определениям и добавляем уникальные части речи в массив
+        foreach ($definitions as $definition) {
+            $partOfSpeech = $definition['partOfSpeech'];
+
+            // Проверяем, что часть речи еще не была добавлена
+            if (!in_array($partOfSpeech, $uniquePartsOfSpeech)) {
+                $uniquePartsOfSpeech[] = $partOfSpeech;
+            }
+        }
+
+        // Возвращаем уникальные части речи
+        return $uniquePartsOfSpeech;
     }
 }
