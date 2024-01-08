@@ -18,6 +18,7 @@ class PartOfSpeechSeeder extends Seeder
             ['name' => 'noun'],
             ['name' => 'verb'],
             ['name' => 'adverb'],
+            ['name' => 'adjective'],
             ['name' => 'conjunction'],
             ['name' => 'preposition'],
             ['name' => 'particle'],

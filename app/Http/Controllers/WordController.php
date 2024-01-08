@@ -29,10 +29,12 @@ class WordController extends Controller
         $wordsArray = $this->splitWords($wordList);
 
         foreach ($wordsArray as $wordValue) {
-            $existingWord = Word::where('word', $wordValue)->first();
+            if ($wordValue !== '') {
+                $existingWord = Word::where('word', $wordValue)->first();
 
-            if (!$existingWord && !empty($wordValue)) {
-                $this->createWord($wordValue);
+                if (!$existingWord) {
+                    $this->createWord($wordValue);
+                }
             }
         }
 
