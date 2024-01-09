@@ -11,16 +11,20 @@ class HomeController extends Controller
     public function index()
     {
         $words = Word::all();
-        $partOfSpeech = PartOfSpeech::all();
+        $partsOfSpeech = PartOfSpeech::all();
         $selectedParts = [];
 
-        return view('site.index', compact('words', 'partOfSpeech', 'selectedParts'));
+        // Sort data
+        $words = $words->sortByDesc('frequency');
+        $parts = $partsOfSpeech->sortBy('name');
+
+        return view('site.index', compact('selectedParts', 'words', 'parts'));
     }
 
     public function filter(Request $request)
     {
-        $partOfSpeech = PartOfSpeech::all();
-        $selectedParts = $request->input('part', []);
+        $partsOfSpeech = PartOfSpeech::all();
+        $selectedParts = $request->input('parts', []);
 
         if (empty($selectedParts)) {
             return redirect()->route('index');
@@ -34,9 +38,11 @@ class HomeController extends Controller
             });
         }
 
-        $words = $query->with('partsOfSpeech')->orderBy('frequency', 'desc')->get();
+        // Sort data
+        $words = $query->orderBy('frequency', 'desc')->get();
+        $parts = $partsOfSpeech->sortBy('name');
 
-        return view('site.index', compact('partOfSpeech', 'selectedParts', 'words'));
+        return view('site.index', compact('partsOfSpeech', 'selectedParts', 'words', 'parts'));
     }
 
     public function export()

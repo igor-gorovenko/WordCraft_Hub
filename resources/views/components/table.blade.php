@@ -22,13 +22,7 @@
             </tr>
         </thead>
         <tbody>
-
-            @php
-            // Сортировка слов по убыванию частоты использования
-            $sortedWords = $words->sortByDesc('frequency');
-            @endphp
-
-            @foreach( $sortedWords as $word)
+            @foreach( $words as $word)
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $word->word }}</td>
