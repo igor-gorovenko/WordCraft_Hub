@@ -11,9 +11,11 @@ class Word extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'word',
         'translate',
         'frequency',
+        'slug',
     ];
 
     public function partsOfSpeech()

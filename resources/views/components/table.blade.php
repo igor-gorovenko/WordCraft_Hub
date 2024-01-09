@@ -19,6 +19,7 @@
                 <th>Translate</th>
                 <th>Frequency</th>
                 <th>Parts of speech</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +35,9 @@
                     {{ $partOfSpeech->name }},
                     @endforeach
                     @endif
+                </td>
+                <td>
+                    <a href="{{ route('word.show', ['slug' => $word->slug]) }}">View</a>
                 </td>
             </tr>
             @endforeach

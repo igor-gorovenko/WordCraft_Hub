@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use App\Models\Word;
 use App\Models\PartOfSpeech;
 use App\Http\Requests\StoreWordRequest;
+use Illuminate\Support\Str;
 
 class WordController extends Controller
 {
@@ -17,6 +18,13 @@ class WordController extends Controller
         $this->client = new Client();
     }
 
+    public function show($slug)
+    {
+        $word = Word::where('slug', $slug)->first();
+
+        return view('site.show', compact('word'));
+    }
+
     public function create()
     {
         return view('site.create');
@@ -26,7 +34,7 @@ class WordController extends Controller
     {
         $wordList = $request->input('wordList');
 
-        $wordsArray = $this->splitWords($wordList);
+        $wordsArray = $this->splitWords(strtolower($wordList));
 
         foreach ($wordsArray as $wordValue) {
             if ($wordValue !== '') {
@@ -61,6 +69,7 @@ class WordController extends Controller
             'word' => $word,
             'translate' => $translation,
             'frequency' => $perMillion,
+            'slug' => Str::slug($word, '-'),
         ]);
 
         // Получите id частей речи из базы данных, используя их названия
