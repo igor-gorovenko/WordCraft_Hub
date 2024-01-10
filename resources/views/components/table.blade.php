@@ -37,7 +37,13 @@
                     @endif
                 </td>
                 <td>
-                    <a href="{{ route('word.show', ['slug' => $word->slug]) }}">View</a>
+                    <div class="d-flex">
+                        <a href="{{ route('word.show', ['slug' => $word->slug]) }}" class="btn btn-outline-primary btn-sm me-2">View</a>
+                        <form method="GET" action="{{ route('word.delete', ['slug' => $word->slug]) }}">
+                            @csrf
+                            <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             @endforeach

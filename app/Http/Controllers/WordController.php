@@ -49,6 +49,14 @@ class WordController extends Controller
         return redirect()->route('index')->with('success', 'Words processed successfully');
     }
 
+    public function destroy($slug)
+    {
+        $word = Word::where('slug', $slug)->firstOrFail();
+        $word->delete();
+
+        return redirect()->route('index')->with('success', 'word deleted');
+    }
+
     protected function splitWords($wordList)
     {
         $delimiters = [" ", "%0D%0A", "\n", "\r"];
