@@ -38,7 +38,7 @@ class WordController extends Controller
 
         foreach ($wordsArray as $wordValue) {
             if ($wordValue !== '') {
-                $existingWord = Word::where('slug', $wordValue)->first();
+                $existingWord = Word::where('word', $wordValue)->first();
 
                 if (!$existingWord) {
                     $this->createWord($wordValue);
@@ -61,24 +61,33 @@ class WordController extends Controller
 
     protected function createWord($word)
     {
-        $translation = $this->getTranslation($word);
         $perMillion = $this->getWordFrequency($word);
-        $partOfSpeech = $this->getWordPartOfSpeech($word);
 
-        $wordModel = Word::create([
-            'word' => $word,
-            'translate' => $translation,
-            'frequency' => $perMillion,
-            'slug' => Str::slug($word, '-'),
-        ]);
+        $partsOfSpeech = $this->getWordPartOfSpeech($word);
 
-        // Получите id частей речи из базы данных, используя их названия
-        $partOfSpeechIds = PartOfSpeech::whereIn('name', $partOfSpeech)->pluck('id')->toArray();
+        $newWordsList = [];
 
-        // Присваиваем части речи слову
-        $wordModel->partsOfSpeech()->attach($partOfSpeechIds);
+        foreach ($partsOfSpeech as $part) {
 
-        return $wordModel;
+            $translation = $this->getTranslation($word);
+
+            $newWord = Word::create([
+                'word' => $word,
+                'translate' => $translation,
+                'frequency' => $perMillion,
+                'slug' => Str::slug($word, '-') . '-' . Str::slug($part, '-'),
+            ]);
+
+            // Получите id части речи из базы данных, используя ее название
+            $partId = PartOfSpeech::where('name', $part)->value('id');
+
+            // Присваиваем часть речи слову
+            $newWord->partsOfSpeech()->attach($partId);
+
+            $newWordsList[] = $newWord;
+        }
+
+        return $newWordsList;
     }
 
     protected function getTranslation($word)
