@@ -13,6 +13,7 @@ class PartOfSpeech extends Model
 
     protected $fillable = [
         'name',
+        'slug',
     ];
 
     public function words()

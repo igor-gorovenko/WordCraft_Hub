@@ -154,17 +154,36 @@ class WordController extends Controller
 
         $partsOfSpeech = [];
 
-        // Обходим массив "dict"
-        foreach ($data['dict'] as $dictItem) {
-            $pos = $dictItem['pos'];
+        // // Обходим массив "dict"
+        // foreach ($data['dict'] as $dictItem) {
+        //     $pos = $dictItem['pos'];
+        //     // Проверяем, чтобы избежать дублирования
+        //     if (!in_array($pos, $partsOfSpeech)) {
+        //         // Добавляем в массив, если тип речи еще не добавлен
+        //         $partsOfSpeech[] = $pos;
+        //     }
+        // }
 
-            // Проверяем, чтобы избежать дублирования
-            if (!in_array($pos, $partsOfSpeech)) {
-                // Добавляем в массив, если тип речи еще не добавлен
-                $partsOfSpeech[] = $pos;
-            }
+        $partsOfSpeech = collect($data['dict'])->pluck('pos')->unique()->toArray();
+
+        foreach ($partsOfSpeech as $part) {
+            $this->addPartOfSpeechIfNotExists($part);
         }
 
         return $partsOfSpeech;
+    }
+
+    protected function addPartOfSpeechIfNotExists($part)
+    {
+        // Пытаемся найти запись с заданным типом речи
+        $existingPart = PartOfSpeech::where('name', $part)->first();
+
+        // Если запись не найдена, создаем новую
+        if (!$existingPart) {
+            PartOfSpeech::create([
+                'name' => $part,
+                'slug' => Str::slug($part, '-'),
+            ]);
+        }
     }
 }
