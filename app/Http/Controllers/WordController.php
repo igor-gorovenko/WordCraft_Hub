@@ -154,17 +154,14 @@ class WordController extends Controller
 
         $partsOfSpeech = [];
 
-        // // Обходим массив "dict"
-        // foreach ($data['dict'] as $dictItem) {
-        //     $pos = $dictItem['pos'];
-        //     // Проверяем, чтобы избежать дублирования
-        //     if (!in_array($pos, $partsOfSpeech)) {
-        //         // Добавляем в массив, если тип речи еще не добавлен
-        //         $partsOfSpeech[] = $pos;
-        //     }
-        // }
-
-        $partsOfSpeech = collect($data['dict'])->pluck('pos')->unique()->toArray();
+        $partsOfSpeech = collect($data['dict'])
+            ->pluck('pos') // Извлекаем типы речи
+            ->reject(function ($pos) { // удаляем пустые строки
+                return empty($pos);
+            })
+            ->unique() // Оставляем уникальные значения
+            ->values() // Сбрасываем ключи массива
+            ->toArray();
 
         foreach ($partsOfSpeech as $part) {
             $this->addPartOfSpeechIfNotExists($part);
