@@ -62,14 +62,12 @@ class WordController extends Controller
     protected function createWord($word)
     {
         $perMillion = $this->getWordFrequency($word);
-
         $partsOfSpeech = $this->getWordPartOfSpeech($word);
-
         $newWordsList = [];
 
         foreach ($partsOfSpeech as $part) {
 
-            $translation = $this->getTranslation($word);
+            $translation = $this->getTranslation($word, $part);
 
             $newWord = Word::create([
                 'word' => $word,
@@ -90,7 +88,7 @@ class WordController extends Controller
         return $newWordsList;
     }
 
-    protected function getTranslation($word)
+    protected function getTranslation($word, $part)
     {
         $response = $this->client->request('POST', 'https://google-translate113.p.rapidapi.com/api/v1/translator/text', [
             'form_params' => [
@@ -105,10 +103,22 @@ class WordController extends Controller
             ],
         ]);
 
-        $translationData = json_decode($response->getBody()->getContents(), true);
+        $data = json_decode($response->getBody()->getContents(), true);
 
-        return isset($translationData['trans']) ? $translationData['trans'] : 'Translation not available';
+        // Обходим массив "dict"
+        foreach ($data['dict'] as $dictItem) {
+            // Проверяем соответствие типа речи
+            if (isset($dictItem['pos']) && $dictItem['pos'] === $part) {
+                // Извлекаем перевод из первого элемента "entry"
+                $translation = $dictItem['entry'][0]['word'];
+
+                return $translation;
+            }
+        }
+
+        return 'Translation not available';
     }
+
 
     protected function getWordFrequency($word)
     {
@@ -126,32 +136,35 @@ class WordController extends Controller
 
     protected function getWordPartOfSpeech($word)
     {
-        $response = $this->client->request('GET', "https://wordsapiv1.p.rapidapi.com/words/{$word}/definitions", [
+        $response = $this->client->request('POST', 'https://google-translate113.p.rapidapi.com/api/v1/translator/text', [
+            'form_params' => [
+                'from' => 'en',
+                'to' => 'ru',
+                'text' => $word,
+            ],
             'headers' => [
-                'X-RapidAPI-Host' => 'wordsapiv1.p.rapidapi.com',
+                'X-RapidAPI-Host' => 'google-translate113.p.rapidapi.com',
                 'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
+                'content-type' => 'application/x-www-form-urlencoded',
             ],
         ]);
 
-        $wordsApiData = json_decode($response->getBody()->getContents(), true);
+        // Получаем данные из API
+        $data = json_decode($response->getBody()->getContents(), true);
 
-        // Получаем определения из ответа API
-        $definitions = $wordsApiData['definitions'];
+        $partsOfSpeech = [];
 
-        // Инициализируем массив для хранения уникальных частей речи
-        $uniquePartsOfSpeech = [];
+        // Обходим массив "dict"
+        foreach ($data['dict'] as $dictItem) {
+            $pos = $dictItem['pos'];
 
-        // Итерируем по определениям и добавляем уникальные части речи в массив
-        foreach ($definitions as $definition) {
-            $partOfSpeech = $definition['partOfSpeech'];
-
-            // Проверяем, что часть речи еще не была добавлена
-            if (!in_array($partOfSpeech, $uniquePartsOfSpeech)) {
-                $uniquePartsOfSpeech[] = $partOfSpeech;
+            // Проверяем, чтобы избежать дублирования
+            if (!in_array($pos, $partsOfSpeech)) {
+                // Добавляем в массив, если тип речи еще не добавлен
+                $partsOfSpeech[] = $pos;
             }
         }
 
-        // Возвращаем уникальные части речи
-        return $uniquePartsOfSpeech;
+        return $partsOfSpeech;
     }
 }
