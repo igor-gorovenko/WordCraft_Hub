@@ -38,7 +38,7 @@ class WordController extends Controller
 
         foreach ($wordsArray as $wordValue) {
             if ($wordValue !== '') {
-                $existingWord = Word::where('word', $wordValue)->first();
+                $existingWord = Word::where('slug', $wordValue)->first();
 
                 if (!$existingWord) {
                     $this->createWord($wordValue);
