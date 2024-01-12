@@ -33,7 +33,7 @@ class HomeController extends Controller
         $query = Word::query();
 
         if (!empty($selectedParts)) {
-            $query->whereHas('partsOfSpeech', function ($partQuery) use ($selectedParts) {
+            $query->whereHas('partOfSpeech', function ($partQuery) use ($selectedParts) {
                 $partQuery->whereIn('name', $selectedParts);
             });
         }
