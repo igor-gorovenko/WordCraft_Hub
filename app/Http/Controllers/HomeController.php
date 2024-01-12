@@ -16,9 +16,9 @@ class HomeController extends Controller
 
         // Sort data
         $words = $words->sortByDesc('frequency');
-        $parts = $partsOfSpeech->sortBy('name');
+        $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
-        return view('site.index', compact('selectedParts', 'words', 'parts'));
+        return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts'));
     }
 
     public function filter(Request $request)
@@ -40,9 +40,9 @@ class HomeController extends Controller
 
         // Sort data
         $words = $query->orderBy('frequency', 'desc')->get();
-        $parts = $partsOfSpeech->sortBy('name');
+        $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
-        return view('site.index', compact('partsOfSpeech', 'selectedParts', 'words', 'parts'));
+        return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts'));
     }
 
     public function export()

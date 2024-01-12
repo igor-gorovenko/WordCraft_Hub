@@ -18,7 +18,7 @@
                 <th>Word</th>
                 <th>Translate</th>
                 <th>Frequency</th>
-                <th>Parts of speech</th>
+                <th>Part of speech</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -30,15 +30,13 @@
                 <td>{{ $word->translate }}</td>
                 <td>{{ $word->frequency }}</td>
                 <td>
-                    @if($word->partsOfSpeech)
-                    @foreach($word->partsOfSpeech as $partOfSpeech)
-                    {{ $partOfSpeech->name }},
-                    @endforeach
+                    @if($word->partOfSpeech)
+                    {{ $word->partOfSpeech->name }}
                     @endif
                 </td>
                 <td>
                     <div class="d-flex">
-                        <a href="{{ route('word.show', ['slug' => $word->slug]) }}" class="btn btn-outline-primary btn-sm me-2">View</a>
+                        <a href="{{ route('word.show', ['slug' => $word->slug]) }}" class="btn btn-outline-primary btn-sm me-2" target="_blank">View</a>
                         <form method="GET" action="{{ route('word.delete', ['slug' => $word->slug]) }}">
                             @csrf
                             <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>

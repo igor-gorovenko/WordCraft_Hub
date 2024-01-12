@@ -9,7 +9,7 @@
 
         <form action="{{ route('filter') }}" method="GET">
             <div class="mb-4">
-                @foreach($parts as $part)
+                @foreach($partsOfSpeech as $part)
                 <div class="form-check mb-1">
                     <label class="form-check-label">
                         <input class="form-check-input" type="checkbox" name="parts[]" value="{{ $part->name }}" {{ in_array($part->name, $selectedParts) ? 'checked' : '' }}>

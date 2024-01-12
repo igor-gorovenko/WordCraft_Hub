@@ -71,11 +71,13 @@ class WordController extends Controller
     {
         $perMillion = $this->getWordFrequency($word);
         $partsOfSpeech = $this->getWordPartOfSpeech($word);
+
         $newWordsList = [];
 
         foreach ($partsOfSpeech as $part) {
 
             $translation = $this->getTranslation($word, $part);
+            $partId = PartOfSpeech::where('name', $part)->value('id');
 
             $newWord = Word::create([
                 'word' => $word,
@@ -84,11 +86,8 @@ class WordController extends Controller
                 'slug' => Str::slug($word, '-') . '-' . Str::slug($part, '-'),
             ]);
 
-            // Получите id части речи из базы данных, используя ее название
-            $partId = PartOfSpeech::where('name', $part)->value('id');
-
-            // Присваиваем часть речи слову
-            $newWord->partsOfSpeech()->attach($partId);
+            $newWord->partOfSpeech()->associate($partId);
+            $newWord->save();
 
             $newWordsList[] = $newWord;
         }

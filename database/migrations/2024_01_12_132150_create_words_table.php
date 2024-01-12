@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('words', function (Blueprint $table) {
             $table->id();
             $table->string('word');
-            $table->string('translate');
-            $table->string('frequency');
+            $table->unsignedBigInteger('part_of_speech_id')->nullable();
+            $table->string('translate')->nullable();
+            $table->string('frequency')->nullable();
             $table->string('slug');
             $table->timestamps();
+
+            $table->foreign('part_of_speech_id')->references('id')->on('parts_of_speech')->onDelete('set null');
         });
     }
 

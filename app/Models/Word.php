@@ -18,8 +18,8 @@ class Word extends Model
         'slug',
     ];
 
-    public function partsOfSpeech()
+    public function partOfSpeech()
     {
-        return $this->belongsToMany(PartOfSpeech::class, 'word_part_of_speech', 'word_id', 'part_of_speech_id');
+        return $this->belongsTo(PartOfSpeech::class, 'part_of_speech_id');
     }
 }
