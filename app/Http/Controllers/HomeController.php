@@ -39,7 +39,7 @@ class HomeController extends Controller
         }
 
         // Sort data
-        $words = $query->orderBy('frequency', 'desc')->get();
+        $words = $query->orderByDesc('frequency')->get();
         $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
         return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts'));
@@ -49,30 +49,21 @@ class HomeController extends Controller
     {
         $query = Word::query();
 
-        $words = $query->with('partsOfSpeech')
-            ->orderBy('frequency', 'desc')
-            ->get();
+        $query->orderByDesc('frequency');
+        $words = $query->get();
 
-        $csvData = "#,Word,Translate,Frequency,Parts of Speech\n";
-        $count = 0;
+        $csvData = "Word,Translate,Frequency,Part of Speech\n";
 
         foreach ($words as $word) {
             // Используем метод pluck, чтобы получить массив имен тегов
-            $partsOfSpeech = $word->partsOfSpeech->pluck('name')->implode(',');
-
-            // Обертываем теги в двойные кавычки
-            $partsOfSpeech = str_replace(',', ', ', $partsOfSpeech);
-            $partsOfSpeech = '"' . str_replace('"', '""', $partsOfSpeech) . '"';
-
-            $count++;
+            $partOfSpeech = $word->partOfSpeech->name;
 
             $csvData .= sprintf(
-                "%s,%s,%s,%s,%s\n",
-                $count,
+                "%s,%s,%s,%s\n",
                 $word->word,
                 $word->translate,
                 $word->frequency,
-                $partsOfSpeech
+                $partOfSpeech
             );
         }
 

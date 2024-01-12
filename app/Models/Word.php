@@ -13,6 +13,7 @@ class Word extends Model
     protected $fillable = [
         'id',
         'word',
+        'part_of_speech_id',
         'translate',
         'frequency',
         'slug',

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('word');
             $table->unsignedBigInteger('part_of_speech_id')->nullable();
             $table->string('translate')->nullable();
-            $table->string('frequency')->nullable();
+            $table->float('frequency')->nullable();
             $table->string('slug');
             $table->timestamps();
 
