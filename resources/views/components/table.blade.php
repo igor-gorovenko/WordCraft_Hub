@@ -1,4 +1,6 @@
 <div class="bg-white p-4">
+
+    <!-- table header -->
     <div class="d-flex justify-content-between align-items-center mb-2">
 
         <h4>Result {{ count($words)}} words</h4>
@@ -7,11 +9,13 @@
 
             <form action="{{ route('export') }}" method="GET">
                 <div>
-                    <button class="btn btn-outline-dark" type="submit">Export .csv</button>
+                    <button class="btn btn-outline-dark" type="submit">Export to .csv</button>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- Table -->
     <table class="table">
         <thead>
             <tr>
@@ -23,7 +27,7 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="align-middle">
             @foreach( $words as $word)
             <tr>
                 <td>{{ $loop->iteration }}</td>
