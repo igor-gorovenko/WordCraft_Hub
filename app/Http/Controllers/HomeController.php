@@ -14,7 +14,7 @@ class HomeController extends Controller
         $partsOfSpeech = PartOfSpeech::all();
         $selectedParts = [];
         $selectedFrequencyRange = [];
-        $frequencyRange = ['Easy', 'Medium', 'Hard'];
+        $frequencyRange = ['easy', 'medium', 'hard'];
 
         // Sort data
         $words = $words->sortByDesc('frequency');
@@ -27,8 +27,8 @@ class HomeController extends Controller
     {
         $partsOfSpeech = PartOfSpeech::all();
         $selectedParts = $request->input('parts', []);
-        $selectedFrequencyRange = $request->input('frequency_range', []);
-        $frequencyRange = ['Easy', 'Medium', 'Hard'];
+        $selectedFrequencyRange = $request->input('range', []);
+        $frequencyRange = ['easy', 'medium', 'hard'];
 
         $query = Word::query();
 
@@ -39,13 +39,13 @@ class HomeController extends Controller
         $query->where(function ($query) use ($selectedFrequencyRange) {
             foreach ($selectedFrequencyRange as $range) {
                 switch ($range) {
-                    case 'Easy':
+                    case 'easy':
                         $query->orWhere('frequency', '>', 20);
                         break;
-                    case 'Medium':
+                    case 'medium':
                         $query->orWhereBetween('frequency', [1, 20]);
                         break;
-                    case 'Hard':
+                    case 'hard':
                         $query->orWhere('frequency', '<', 1);
                         break;
                 }
