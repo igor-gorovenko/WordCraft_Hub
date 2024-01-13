@@ -8,13 +8,27 @@ use App\Models\PartOfSpeech;
 
 class HomeController extends Controller
 {
+
+    protected $partsOfSpeech;
+    protected $selectedParts;
+    protected $frequencyRange;
+    protected $selectedFrequencyRange;
+
+    public function __construct()
+    {
+        $this->partsOfSpeech = PartOfSpeech::all();
+        $this->selectedParts = [];
+        $this->frequencyRange = ['easy', 'medium', 'hard'];
+        $this->selectedFrequencyRange = [];
+    }
+
     public function index()
     {
-        $words = Word::all();
-        $partsOfSpeech = PartOfSpeech::all();
-        $selectedParts = [];
-        $selectedFrequencyRange = [];
-        $frequencyRange = ['easy', 'medium', 'hard'];
+        $words = $this->applyFilter();
+        $partsOfSpeech = $this->partsOfSpeech;
+        $selectedParts = $this->selectedParts;
+        $frequencyRange = $this->frequencyRange;
+        $selectedFrequencyRange = $this->selectedFrequencyRange;
 
         // Sort data
         $words = $words->sortByDesc('frequency');
@@ -25,41 +39,22 @@ class HomeController extends Controller
 
     public function filter(Request $request)
     {
-        $partsOfSpeech = PartOfSpeech::all();
-        $selectedParts = $request->input('parts', []);
-        $selectedFrequencyRange = $request->input('range', []);
-        $frequencyRange = ['easy', 'medium', 'hard'];
+        $this->selectedParts = $request->input('parts', []);
+        $this->selectedFrequencyRange = $request->input('range', []);
 
-        $query = Word::query();
+        $words = $this->applyFilter();
+        $partsOfSpeech = $this->partsOfSpeech;
+        $selectedParts = $this->selectedParts;
+        $frequencyRange = $this->frequencyRange;
+        $selectedFrequencyRange = $this->selectedFrequencyRange;
 
-        if (empty($selectedParts) && empty($selectedFrequencyRange)) {
+        // Если нужен редирект, добавьте условие
+        if (empty($this->selectedParts) && empty($this->selectedFrequencyRange)) {
             return redirect()->route('index');
         }
 
-        $query->where(function ($query) use ($selectedFrequencyRange) {
-            foreach ($selectedFrequencyRange as $range) {
-                switch ($range) {
-                    case 'easy':
-                        $query->orWhere('frequency', '>', 20);
-                        break;
-                    case 'medium':
-                        $query->orWhereBetween('frequency', [1, 20]);
-                        break;
-                    case 'hard':
-                        $query->orWhere('frequency', '<', 1);
-                        break;
-                }
-            }
-        });
-
-        if (!empty($selectedParts)) {
-            $query->whereHas('partOfSpeech', function ($partQuery) use ($selectedParts) {
-                $partQuery->whereIn('name', $selectedParts);
-            });
-        }
-
         // Sort data
-        $words = $query->orderByDesc('frequency')->get();
+        $words = $words->sortByDesc('frequency');
         $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
         return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts', 'frequencyRange', 'selectedFrequencyRange'));
@@ -92,5 +87,34 @@ class HomeController extends Controller
         return response($csvData)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', "attachment; filename={$filename}");
+    }
+
+    protected function applyFilter(Request $request = null)
+    {
+        $query = Word::query();
+
+        $query->where(function ($query) {
+            foreach ($this->selectedFrequencyRange as $range) {
+                switch ($range) {
+                    case 'easy':
+                        $query->orWhere('frequency', '>', 20);
+                        break;
+                    case 'medium':
+                        $query->orWhereBetween('frequency', [1, 20]);
+                        break;
+                    case 'hard':
+                        $query->orWhere('frequency', '<', 1);
+                        break;
+                }
+            }
+        });
+
+        if (!empty($this->selectedParts)) {
+            $query->whereHas('partOfSpeech', function ($partQuery) {
+                $partQuery->whereIn('name', $this->selectedParts);
+            });
+        }
+
+        return $query->orderByDesc('frequency')->get();
     }
 }
