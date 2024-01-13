@@ -13,24 +13,44 @@ class HomeController extends Controller
         $words = Word::all();
         $partsOfSpeech = PartOfSpeech::all();
         $selectedParts = [];
+        $selectedFrequencyRange = [];
+        $frequencyRange = ['Easy', 'Medium', 'Hard'];
 
         // Sort data
         $words = $words->sortByDesc('frequency');
         $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
-        return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts'));
+        return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts', 'frequencyRange', 'selectedFrequencyRange'));
     }
 
     public function filter(Request $request)
     {
         $partsOfSpeech = PartOfSpeech::all();
         $selectedParts = $request->input('parts', []);
+        $selectedFrequencyRange = $request->input('frequency_range', []);
+        $frequencyRange = ['Easy', 'Medium', 'Hard'];
 
-        if (empty($selectedParts)) {
+        $query = Word::query();
+
+        if (empty($selectedParts) && empty($selectedFrequencyRange)) {
             return redirect()->route('index');
         }
 
-        $query = Word::query();
+        $query->where(function ($query) use ($selectedFrequencyRange) {
+            foreach ($selectedFrequencyRange as $range) {
+                switch ($range) {
+                    case 'Easy':
+                        $query->orWhere('frequency', '>', 20);
+                        break;
+                    case 'Medium':
+                        $query->orWhereBetween('frequency', [1, 20]);
+                        break;
+                    case 'Hard':
+                        $query->orWhere('frequency', '<', 1);
+                        break;
+                }
+            }
+        });
 
         if (!empty($selectedParts)) {
             $query->whereHas('partOfSpeech', function ($partQuery) use ($selectedParts) {
@@ -42,7 +62,7 @@ class HomeController extends Controller
         $words = $query->orderByDesc('frequency')->get();
         $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
-        return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts'));
+        return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts', 'frequencyRange', 'selectedFrequencyRange'));
     }
 
     public function export()
