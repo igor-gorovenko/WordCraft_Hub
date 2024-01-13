@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('parts_of_speech', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug');
             $table->timestamps();
         });
     }

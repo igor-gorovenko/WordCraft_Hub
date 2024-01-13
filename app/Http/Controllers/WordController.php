@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use App\Models\Word;
 use App\Models\PartOfSpeech;
 use App\Http\Requests\StoreWordRequest;
+use Illuminate\Support\Str;
 
 class WordController extends Controller
 {
@@ -17,6 +18,13 @@ class WordController extends Controller
         $this->client = new Client();
     }
 
+    public function show($slug)
+    {
+        $word = Word::where('slug', $slug)->first();
+
+        return view('site.show', compact('word'));
+    }
+
     public function create()
     {
         return view('site.create');
@@ -26,7 +34,7 @@ class WordController extends Controller
     {
         $wordList = $request->input('wordList');
 
-        $wordsArray = $this->splitWords($wordList);
+        $wordsArray = $this->splitWords(strtolower($wordList));
 
         foreach ($wordsArray as $wordValue) {
             if ($wordValue !== '') {
@@ -41,6 +49,14 @@ class WordController extends Controller
         return redirect()->route('index')->with('success', 'Words processed successfully');
     }
 
+    public function destroy($slug)
+    {
+        $word = Word::where('slug', $slug)->firstOrFail();
+        $word->delete();
+
+        return redirect()->route('index')->with('success', 'word deleted');
+    }
+
     protected function splitWords($wordList)
     {
         $delimiters = [" ", "%0D%0A", "\n", "\r"];
@@ -53,26 +69,33 @@ class WordController extends Controller
 
     protected function createWord($word)
     {
-        $translation = $this->getTranslation($word);
         $perMillion = $this->getWordFrequency($word);
-        $partOfSpeech = $this->getWordPartOfSpeech($word);
+        $partsOfSpeech = $this->getWordPartOfSpeech($word);
 
-        $wordModel = Word::create([
-            'word' => $word,
-            'translate' => $translation,
-            'frequency' => $perMillion,
-        ]);
+        $newWordsList = [];
 
-        // Получите id частей речи из базы данных, используя их названия
-        $partOfSpeechIds = PartOfSpeech::whereIn('name', $partOfSpeech)->pluck('id')->toArray();
+        foreach ($partsOfSpeech as $part) {
 
-        // Присваиваем части речи слову
-        $wordModel->partsOfSpeech()->attach($partOfSpeechIds);
+            $translation = $this->getTranslation($word, $part);
+            $partId = PartOfSpeech::where('name', $part)->value('id');
 
-        return $wordModel;
+            $newWord = Word::create([
+                'word' => $word,
+                'translate' => $translation,
+                'frequency' => $perMillion,
+                'slug' => Str::slug($word, '-') . '-' . Str::slug($part, '-'),
+            ]);
+
+            $newWord->partOfSpeech()->associate($partId);
+            $newWord->save();
+
+            $newWordsList[] = $newWord;
+        }
+
+        return $newWordsList;
     }
 
-    protected function getTranslation($word)
+    protected function getTranslation($word, $part)
     {
         $response = $this->client->request('POST', 'https://google-translate113.p.rapidapi.com/api/v1/translator/text', [
             'form_params' => [
@@ -87,10 +110,22 @@ class WordController extends Controller
             ],
         ]);
 
-        $translationData = json_decode($response->getBody()->getContents(), true);
+        $data = json_decode($response->getBody()->getContents(), true);
 
-        return isset($translationData['trans']) ? $translationData['trans'] : 'Translation not available';
+        // Обходим массив "dict"
+        foreach ($data['dict'] as $dictItem) {
+            // Проверяем соответствие типа речи
+            if (isset($dictItem['pos']) && $dictItem['pos'] === $part) {
+                // Извлекаем перевод из первого элемента "entry"
+                $translation = $dictItem['entry'][0]['word'];
+
+                return $translation;
+            }
+        }
+
+        return 'Translation not available';
     }
+
 
     protected function getWordFrequency($word)
     {
@@ -108,32 +143,51 @@ class WordController extends Controller
 
     protected function getWordPartOfSpeech($word)
     {
-        $response = $this->client->request('GET', "https://wordsapiv1.p.rapidapi.com/words/{$word}/definitions", [
+        $response = $this->client->request('POST', 'https://google-translate113.p.rapidapi.com/api/v1/translator/text', [
+            'form_params' => [
+                'from' => 'en',
+                'to' => 'ru',
+                'text' => $word,
+            ],
             'headers' => [
-                'X-RapidAPI-Host' => 'wordsapiv1.p.rapidapi.com',
+                'X-RapidAPI-Host' => 'google-translate113.p.rapidapi.com',
                 'X-RapidAPI-Key' => env('RAPIDAPI_KEY'),
+                'content-type' => 'application/x-www-form-urlencoded',
             ],
         ]);
 
-        $wordsApiData = json_decode($response->getBody()->getContents(), true);
+        // Получаем данные из API
+        $data = json_decode($response->getBody()->getContents(), true);
 
-        // Получаем определения из ответа API
-        $definitions = $wordsApiData['definitions'];
+        $partsOfSpeech = [];
 
-        // Инициализируем массив для хранения уникальных частей речи
-        $uniquePartsOfSpeech = [];
+        $partsOfSpeech = collect($data['dict'])
+            ->pluck('pos') // Извлекаем типы речи
+            ->reject(function ($pos) { // удаляем пустые строки
+                return empty($pos);
+            })
+            ->unique() // Оставляем уникальные значения
+            ->values() // Сбрасываем ключи массива
+            ->toArray();
 
-        // Итерируем по определениям и добавляем уникальные части речи в массив
-        foreach ($definitions as $definition) {
-            $partOfSpeech = $definition['partOfSpeech'];
-
-            // Проверяем, что часть речи еще не была добавлена
-            if (!in_array($partOfSpeech, $uniquePartsOfSpeech)) {
-                $uniquePartsOfSpeech[] = $partOfSpeech;
-            }
+        foreach ($partsOfSpeech as $part) {
+            $this->addPartOfSpeechIfNotExists($part);
         }
 
-        // Возвращаем уникальные части речи
-        return $uniquePartsOfSpeech;
+        return $partsOfSpeech;
+    }
+
+    protected function addPartOfSpeechIfNotExists($part)
+    {
+        // Пытаемся найти запись с заданным типом речи
+        $existingPart = PartOfSpeech::where('name', $part)->first();
+
+        // Если запись не найдена, создаем новую
+        if (!$existingPart) {
+            PartOfSpeech::create([
+                'name' => $part,
+                'slug' => Str::slug($part, '-'),
+            ]);
+        }
     }
 }

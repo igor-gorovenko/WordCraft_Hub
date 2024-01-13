@@ -13,10 +13,11 @@ class PartOfSpeech extends Model
 
     protected $fillable = [
         'name',
+        'slug',
     ];
 
     public function words()
     {
-        return $this->belongsToMany(Word::class, 'word_part_of_speech', 'part_of_speech_id', 'word_id');
+        return $this->hasMany(Word::class, 'part_of_speech_id');
     }
 }
