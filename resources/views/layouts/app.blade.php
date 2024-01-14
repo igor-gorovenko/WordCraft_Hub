@@ -9,9 +9,14 @@
 
 <body class="bg-light">
     @include('components/header')
-    <div class="container mt-4">
-        @yield('content')
+
+    <div class="d-flex " style="min-height: 100vh;">
+        <div class="container mt-4 mb-4">
+            @yield('content')
+        </div>
     </div>
+
+    @include('components/footer')
 </body>
 
 </html>
