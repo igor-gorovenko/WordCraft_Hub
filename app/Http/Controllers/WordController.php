@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use App\Models\Word;
 use App\Models\PartOfSpeech;
@@ -55,6 +56,15 @@ class WordController extends Controller
         $word->delete();
 
         return redirect()->route('index')->with('success', 'word deleted');
+    }
+
+    public function deleteSelected(Request $request)
+    {
+        $selectedWords = $request->input('selected_words', []);
+
+        Word::destroy($selectedWords);
+
+        return redirect()->route('index')->with('success', 'words deleted');
     }
 
     protected function splitWords($wordList)
