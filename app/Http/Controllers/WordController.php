@@ -148,7 +148,7 @@ class WordController extends Controller
 
         $wordsApiData = json_decode($response->getBody()->getContents(), true);
 
-        return isset($wordsApiData['frequency']['perMillion']) ? $wordsApiData['frequency']['perMillion'] : 0;
+        return isset($wordsApiData['frequency']['perMillion']) ? round($wordsApiData['frequency']['perMillion']) : 0;
     }
 
     protected function getWordPartOfSpeech($word)
