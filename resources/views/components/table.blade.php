@@ -37,7 +37,7 @@
                 @foreach( $words as $word)
                 <tr>
                     <td>
-                        <input type="checkbox" name="selected_words[]" value="{{ $word->id }}">
+                        <input class="form-check-input" type="checkbox" name="selected_words[]" value="{{ $word->id }}">
                     </td>
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $word->word }}</td>
