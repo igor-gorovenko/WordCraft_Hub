@@ -23,7 +23,9 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th></th>
+                    <th>
+                        <input class="form-check-input" type="checkbox" id="selectAll">
+                    </th>
                     <th>#</th>
                     <th>Word</th>
                     <th>Translate</th>
@@ -62,7 +64,14 @@
 
             </tbody>
         </table>
-
     </form>
-
 </div>
+
+<script>
+    document.getElementById('selectAll').addEventListener('change', function() {
+        var checkboxes = document.getElementsByName('selected_words[]');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = document.getElementById('selectAll').checked;
+        });
+    });
+</script>
