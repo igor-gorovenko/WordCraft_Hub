@@ -69,7 +69,7 @@ class WordController extends Controller
 
     protected function splitWords($wordList)
     {
-        $delimiters = [" ", "%0D%0A", "\n", "\r"];
+        $delimiters = [" ", "%0D%0A", "\n", "\r", ",", ".", ";", '!', '?'];
         $replaceDelimiter = '|';
 
         $wordList = str_replace($delimiters, $replaceDelimiter, $wordList);
