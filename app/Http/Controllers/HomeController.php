@@ -8,7 +8,7 @@ use App\Models\PartOfSpeech;
 
 class HomeController extends Controller
 {
-
+    protected $words;
     protected $partsOfSpeech;
     protected $selectedParts;
     protected $frequencyRange;
@@ -16,7 +16,8 @@ class HomeController extends Controller
 
     public function __construct()
     {
-        $this->partsOfSpeech = PartOfSpeech::all();
+        $this->words = Word::all()->sortByDesc('frequency');
+        $this->partsOfSpeech = PartOfSpeech::all()->sortBy('name');
         $this->selectedParts = [];
         $this->frequencyRange = ['easy', 'medium', 'hard'];
         $this->selectedFrequencyRange = [];
@@ -24,15 +25,11 @@ class HomeController extends Controller
 
     public function index()
     {
-        $words = $this->applyFilter();
+        $words = $this->words;
         $partsOfSpeech = $this->partsOfSpeech;
         $selectedParts = $this->selectedParts;
         $frequencyRange = $this->frequencyRange;
         $selectedFrequencyRange = $this->selectedFrequencyRange;
-
-        // Sort data
-        $words = $words->sortByDesc('frequency');
-        $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
         return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts', 'frequencyRange', 'selectedFrequencyRange'));
     }
@@ -48,29 +45,20 @@ class HomeController extends Controller
         $frequencyRange = $this->frequencyRange;
         $selectedFrequencyRange = $this->selectedFrequencyRange;
 
-        // Если нужен редирект, добавьте условие
         if (empty($this->selectedParts) && empty($this->selectedFrequencyRange)) {
             return redirect()->route('index');
         }
-
-        // Sort data
-        $words = $words->sortByDesc('frequency');
-        $partsOfSpeech = $partsOfSpeech->sortBy('name');
 
         return view('site.index', compact('words', 'partsOfSpeech', 'selectedParts', 'frequencyRange', 'selectedFrequencyRange'));
     }
 
     public function export()
     {
-        $query = Word::query();
-
-        $query->orderByDesc('frequency');
-        $words = $query->get();
+        $words = $this->words;
 
         $csvData = "Word,Translate,Frequency,Part of Speech\n";
 
         foreach ($words as $word) {
-            // Используем метод pluck, чтобы получить массив имен тегов
             $partOfSpeech = $word->partOfSpeech->name;
 
             $csvData .= sprintf(
@@ -89,9 +77,9 @@ class HomeController extends Controller
             ->header('Content-Disposition', "attachment; filename={$filename}");
     }
 
-    protected function applyFilter(Request $request = null)
+    protected function applyFilter()
     {
-        $query = Word::query();
+        $query = Word::query()->orderByDesc('frequency');;
 
         $query->where(function ($query) {
             foreach ($this->selectedFrequencyRange as $range) {
@@ -115,6 +103,6 @@ class HomeController extends Controller
             });
         }
 
-        return $query->orderByDesc('frequency')->get();
+        return $query->get();
     }
 }
